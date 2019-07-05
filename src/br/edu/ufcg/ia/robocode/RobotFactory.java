@@ -1,10 +1,9 @@
 package br.edu.ufcg.ia.robocode;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 /**
  * Creates the robot and compiles it.

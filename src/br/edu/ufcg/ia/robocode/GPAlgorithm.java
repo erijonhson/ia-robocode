@@ -1,43 +1,45 @@
 package br.edu.ufcg.ia.robocode;
 
-import java.io.FileWriter;
-import java.io.IOException;
-
-import javax.swing.SpinnerNumberModel;
-
-import org.jgap.Chromosome;
-import org.jgap.Configuration;
-import org.jgap.FitnessFunction;
-import org.jgap.Gene;
-import org.jgap.Genotype;
-import org.jgap.IChromosome;
-import org.jgap.InvalidConfigurationException;
+import org.jgap.*;
 import org.jgap.impl.*;
-
 import robocode.control.BattleSpecification;
 import robocode.control.BattlefieldSpecification;
 import robocode.control.RobocodeEngine;
 import robocode.control.RobotSpecification;
 
+import javax.swing.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
- * Esta Classe irá rodar varías batalhas no Robocode e fazer uso
- * do Algoritmo Genético para treinar o nosso robô.
+ * It will run several battles in Robocode and make use of Genetic Algorithm to train our robot.
  */
 public class GPAlgorithm extends FitnessFunction {
 
+	private static final int THREAD_SIZE = 4;
+	private ExecutorService workers = Executors.newFixedThreadPool(THREAD_SIZE);
+
 	private Configuration conf;
 
-	private SpinnerNumberModel model = new SpinnerNumberModel(0,0,Integer.MAX_VALUE,1);
+	private SpinnerNumberModel model = new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1);
 
 	private static final int POPULATION_SIZE = 100;
 	private static final int MAX_GENERATIONS = 45;
 	public static int robotScore, enemyScore;
 
-	public void runAlgorithm() throws Exception{
+	public static void main(String[] args) throws Exception {
+		System.out.println("Training begin");
+		new GPAlgorithm().runAlgorithm();
+	}
+
+	public void runAlgorithm() throws Exception {
 		conf = new DefaultConfiguration();
 		BestChromosomesSelector best = new BestChromosomesSelector(conf, 0.6);
 
-		// não permitir cromossomos duplicados
 		best.setDoubletteChromosomesAllowed(false);
 
 		conf.addNaturalSelector(best, false);
@@ -53,24 +55,25 @@ public class GPAlgorithm extends FitnessFunction {
 		conf.setSampleChromosome(primeiroCromossomo);
 		conf.setPopulationSize(POPULATION_SIZE);
 
-		Genotype populacao = Genotype.randomInitialGenotype(conf);
-		IChromosome melhorSolucao = null;
+		Genotype population = Genotype.randomInitialGenotype(conf);
 
-		for (int i = 0; i < MAX_GENERATIONS; ++i) {
-			populacao.evolve();
-			melhorSolucao = populacao.getFittestChromosome();
-			System.out.printf("--- Melhor solução após %d gerações: %s  ---\n", i + 1, melhorSolucao);
-			salvarInformacoesDaGeracao(i + 1, melhorSolucao.getFitnessValue());
+		List<Integer> hackLoop = new LinkedList<>();
+		for (int i = 1; i <= MAX_GENERATIONS; ++i) {
+			hackLoop.add(i);
 		}
 
-		criaRobo(melhorSolucao);
-	}
-	
-	public static void main(String[] args) throws Exception {
-		new GPAlgorithm().runAlgorithm();
+		hackLoop.forEach(index -> workers.execute(() -> {
+			population.evolve();
+			IChromosome bestFit = population.getFittestChromosome();
+			System.out.printf("--- Best solution after %d generation: %s  ---\n", index, bestFit);
+			saveInfoAboutBestFit(index, bestFit.getFitnessValue());
+			if (index == MAX_GENERATIONS) {
+				createRobot(bestFit);
+			}
+		}));
 	}
 
-	private void salvarInformacoesDaGeracao(int i, double fitnessValue) {
+	private synchronized void saveInfoAboutBestFit(int i, double fitnessValue) {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter("results/data.csv", true);
@@ -99,9 +102,9 @@ public class GPAlgorithm extends FitnessFunction {
 	}
 
 	/**
-	 * Cria um Robô a partir de um determinado cromossomo
+	 * Creates a robot from chromosome
 	 */
-	private void criaRobo(IChromosome chromo) {
+	private void createRobot(IChromosome chromo) {
 		int[] robotConfig = new int[RobotFactory.MAX_ROBOT_ID];
 		Gene[] genes = chromo.getGenes();
 		for (int i = 0; i < RobotFactory.MAX_ROBOT_ID; i++) {
@@ -110,7 +113,7 @@ public class GPAlgorithm extends FitnessFunction {
 		RobotFactory.create(robotConfig);
 	}
 
-	public void result(String name, int score) {
+	public static void updateScores(String name, int score) {
 		if (name.equals(RobotFactory.MODEL_NAME)) {
 			robotScore = score;
 		} else {
@@ -123,7 +126,7 @@ public class GPAlgorithm extends FitnessFunction {
 		int numberOfRounds = 2;
 		int fitness = 0;
 
-		criaRobo(chromosome);
+		createRobot(chromosome);
 
 		RobocodeEngine engine = new RobocodeEngine();
 		engine.addBattleListener(new BattleObserver());
@@ -131,7 +134,7 @@ public class GPAlgorithm extends FitnessFunction {
 
 		BattlefieldSpecification battlefield = new BattlefieldSpecification(800, 600);
 		RobotSpecification[] selectedRobots = engine.getLocalRepository("sample.Crazy, " + RobotFactory.MODEL_NAME);
-		BattleSpecification battleSpec = new BattleSpecification(numberOfRounds, battlefield, selectedRobots);	
+		BattleSpecification battleSpec = new BattleSpecification(numberOfRounds, battlefield, selectedRobots);
 		engine.runBattle(battleSpec, true);
 		fitness += robotScore;
 

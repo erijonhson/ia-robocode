@@ -7,26 +7,29 @@ import robocode.control.events.BattleMessageEvent;
 
 public class BattleObserver extends BattleAdaptor {
 
+	static final boolean LOG_PARTIAL_RESULTS = false;
+
 	public void onBattleCompleted(BattleCompletedEvent e) {
-		
-		
-		System.out.println("-- Battle has completed --");
-        
-        GPAlgorithm gp = new GPAlgorithm();
-        // Print out the sorted results with the robot names
-        System.out.println("Battle results:");
-        for (robocode.BattleResults result : e.getSortedResults()) {
-            System.out.println("  " + result.getTeamLeaderName() + ": " + result.getScore());
-            gp.result(result.getTeamLeaderName(), result.getScore());
-        }
-    }
+		log("-- Battle has completed --");
+		log("     Battle results:");
+		for (robocode.BattleResults result : e.getSortedResults()) {
+			log("       " + result.getTeamLeaderName() + ": score " + result.getScore());
+			GPAlgorithm.updateScores(result.getTeamLeaderName(), result.getScore());
+		}
+	}
 
-    public void onBattleMessage(BattleMessageEvent e) {
-        System.out.println("Msg> " + e.getMessage());
-    }
+	public void onBattleMessage(BattleMessageEvent e) {
+		log("Msg> " + e.getMessage());
+	}
 
-     public void onBattleError(BattleErrorEvent e) {
-        System.err.println("Err> " + e.getError());
-    }
+	public void onBattleError(BattleErrorEvent e) {
+		log("Err> " + e.getError());
+	}
+
+	public void log(String out) {
+		if (LOG_PARTIAL_RESULTS) {
+			System.out.println(out);
+		}
+	}
 
 }
