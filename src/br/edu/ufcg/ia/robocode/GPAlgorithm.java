@@ -130,7 +130,7 @@ public class GPAlgorithm extends FitnessFunction {
 
 		fitness = fitness / 2.0;
 
-		return fitness > 0.0 ? fitness : 0.0;
+		return fitness > 0.0 ? fitness : 0.1;
 	}
 
 	private int[] solveRobotConfig(IChromosome chromo) {

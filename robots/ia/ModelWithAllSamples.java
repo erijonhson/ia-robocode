@@ -38,7 +38,7 @@ public class ModelWithAllSamples extends AdvancedRobot {
 	 * Feature 0
 	 */
 	public void run() {
-		if (4 == CORNERS) {
+		if (2 == CORNERS) {
 			setBodyColor(Color.red);
 			setGunColor(Color.black);
 			setRadarColor(Color.yellow);
@@ -46,28 +46,28 @@ public class ModelWithAllSamples extends AdvancedRobot {
 			setScanColor(Color.green);
 			others = getOthers(); // Save # of other bots
 			goCorner(); // Move to a corner
-		} else if (4 == CRAZY) { // to corners
+		} else if (2 == CRAZY) { // to corners
 			setBodyColor(new Color(0, 200, 0));
 			setGunColor(new Color(0, 150, 50));
 			setRadarColor(new Color(0, 100, 100));
 			setBulletColor(new Color(255, 255, 100));
 			setScanColor(new Color(255, 200, 200));
-		} else if (4 == FIRE) {
+		} else if (2 == FIRE) {
 			setBodyColor(Color.orange);
 			setGunColor(Color.orange);
 			setRadarColor(Color.red);
 			setScanColor(Color.red);
 			setBulletColor(Color.red);
-		} else if (4 == RAMFIRE) {
+		} else if (2 == RAMFIRE) {
 			setBodyColor(Color.lightGray);
 			setGunColor(Color.gray);
 			setRadarColor(Color.darkGray);
-		} else if (4 == SPINBOT) {
+		} else if (2 == SPINBOT) {
 			setBodyColor(Color.blue);
 			setGunColor(Color.blue);
 			setRadarColor(Color.black);
 			setScanColor(Color.yellow);
-		} else if (4 == TRACKER) {
+		} else if (2 == TRACKER) {
 			setBodyColor(new Color(128, 128, 50));
 			setGunColor(new Color(50, 50, 20));
 			setRadarColor(new Color(200, 200, 70));
@@ -77,13 +77,13 @@ public class ModelWithAllSamples extends AdvancedRobot {
 			trackName = null; // Initialize to not tracking anyone
 			setAdjustGunForRobotTurn(true); // Keep the gun still when we turn
 			gunTurnAmt = 10; // Initialize gunTurn to 10
-		} else if (4 == TRACKERFIRE) {
+		} else if (2 == TRACKERFIRE) {
 			setBodyColor(Color.pink);
 			setGunColor(Color.pink);
 			setRadarColor(Color.pink);
 			setScanColor(Color.pink);
 			setBulletColor(Color.pink);
-		} else if (4 == WALLS) {
+		} else if (2 == WALLS) {
 			setBodyColor(Color.black);
 			setGunColor(Color.black);
 			setRadarColor(Color.orange);
@@ -108,12 +108,12 @@ public class ModelWithAllSamples extends AdvancedRobot {
 		int gunIncrement = 3;
 
 		while (true) {
-			if (4 == CORNERS) {
+			if (2 == CORNERS) {
 				for (int i = 0; i < 30; i++) {
 					turnGunLeft (gunIncrement);
 				}
 				gunIncrement *= -1;
-			} else if (4 == CRAZY) {
+			} else if (2 == CRAZY) {
 				// Tell the game we will want to move ahead 40000 -- some large number
 				setAhead(40000);
 				movingForward = true;
@@ -137,11 +137,11 @@ public class ModelWithAllSamples extends AdvancedRobot {
 				// .. and wait for that turn to finish.
 				waitFor(new TurnCompleteCondition(this));
 				// then back to the top to do it all again
-			} else if (4 == FIRE) {
+			} else if (2 == FIRE) {
 				turnGunRight(5);
-			} else if (4 == RAMFIRE) {
+			} else if (2 == RAMFIRE) {
 				turnRight(5 * turnDirection);
-			} else if (4 == SPINBOT) {
+			} else if (2 == SPINBOT) {
 				// Tell the game that when we take move,
 				// we'll also want to turn right... a lot.
 				setTurnRight(10000);
@@ -150,7 +150,7 @@ public class ModelWithAllSamples extends AdvancedRobot {
 				// Start moving (and turning)
 				ahead(10000);
 				// Repeat.
-			} else if (4 == TRACKER) {
+			} else if (2 == TRACKER) {
 				// turn the Gun (looks for enemy)
 				turnGunRight(gunTurnAmt);
 				// Keep track of how long we've been looking
@@ -167,9 +167,9 @@ public class ModelWithAllSamples extends AdvancedRobot {
 				if (count > 11) {
 					trackName = null;
 				}
-			} else if (4 == TRACKERFIRE) {
+			} else if (2 == TRACKERFIRE) {
 				turnGunRight(10); // Scans automatically
-			} else if (4 == WALLS) {
+			} else if (2 == WALLS) {
 				// Look before we turn when ahead() completes.
 				peek = true;
 				// Move up the wall
@@ -187,7 +187,7 @@ public class ModelWithAllSamples extends AdvancedRobot {
 	 * Feature 1
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
-		if (8 == CORNERS) {
+		if (4 == CORNERS) {
 			// Should we stop, or just fire?
 			if (stopWhenSeeRobot) {
 				// Stop everything!  You can safely call stop multiple times.
@@ -204,9 +204,9 @@ public class ModelWithAllSamples extends AdvancedRobot {
 			} else {
 				smartFire(e.getDistance());
 			}
-		} else if (8 == CRAZY) {
+		} else if (4 == CRAZY) {
 			fire(1);
-		} else if (8 == FIRE) {
+		} else if (4 == FIRE) {
 			// If the other robot is close by, and we have plenty of life,
 			// fire hard!
 			if (e.getDistance() < 50 && getEnergy() > 50) {
@@ -217,7 +217,7 @@ public class ModelWithAllSamples extends AdvancedRobot {
 			}
 			// Call scan again, before we turn the gun
 			scan();
-		} else if (8 == RAMFIRE) {
+		} else if (4 == RAMFIRE) {
 			if (e.getBearing() >= 0) {
 				turnDirection = 1;
 			} else {
@@ -226,9 +226,9 @@ public class ModelWithAllSamples extends AdvancedRobot {
 			turnRight(e.getBearing());
 			ahead(e.getDistance() + 5);
 			scan(); // Might want to move ahead again!
-		} else if (8 == SPINBOT) {
+		} else if (4 == SPINBOT) {
 			fire(3);
-		} else if (8 == TRACKER) {
+		} else if (4 == TRACKER) {
 			// If we have a target, and this isn't it, return immediately
 			// so we can get more ScannedRobotEvents.
 			if (trackName != null && !e.getName().equals(trackName)) {
@@ -263,7 +263,7 @@ public class ModelWithAllSamples extends AdvancedRobot {
 				}
 			}
 			scan();
-		} else if (8 == TRACKERFIRE) {
+		} else if (4 == TRACKERFIRE) {
 			// Calculate exact location of the robot
 			double absoluteBearing = getHeading() + e.getBearing();
 			double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
@@ -287,7 +287,7 @@ public class ModelWithAllSamples extends AdvancedRobot {
 			if (bearingFromGun == 0) {
 				scan();
 			}
-		} else if (8 == WALLS) {
+		} else if (4 == WALLS) {
 			fire(2);
 			// Note that scan is called automatically when the robot is moving.
 			// By calling it manually here, we make sure we generate another scan event if there's a robot on the next
@@ -302,7 +302,7 @@ public class ModelWithAllSamples extends AdvancedRobot {
 	 * Feature 2
 	 */
 	public void onHitWall(HitWallEvent e) {
-		if (5 == CRAZY) {
+		if (1 == CRAZY) {
 			// Bounce off!
 			reverseDirection();
 		}
@@ -378,7 +378,7 @@ public class ModelWithAllSamples extends AdvancedRobot {
 	 * Feature 4
 	 */
 	public void onHitByBullet(HitByBulletEvent e) {
-		if (2 == FIRE) {
+		if (1 == FIRE) {
 			turnRight(normalRelativeAngleDegrees(90 - (getHeading() - e.getHeading())));
 			ahead(dist);
 			dist *= -1;
