@@ -7,29 +7,29 @@ import robocode.control.events.BattleMessageEvent;
 
 public class BattleObserver extends BattleAdaptor {
 
-	static final boolean LOG_PARTIAL_RESULTS = false;
+//	static final boolean LOG_PARTIAL_RESULTS = true;
 
 	public void onBattleCompleted(BattleCompletedEvent e) {
-		log("-- Battle has completed --");
-		log("     Battle results:");
+//		log("-- Battle has completed --");
+//		log("     Battle results:");
 		for (robocode.BattleResults result : e.getSortedResults()) {
-			log("       " + result.getTeamLeaderName() + ": score " + result.getScore());
+//			log("       " + result.getTeamLeaderName() + ": score " + result.getScore());
 			GPAlgorithm.updateScores(result.getTeamLeaderName(), result.getScore());
 		}
 	}
 
-	public void onBattleMessage(BattleMessageEvent e) {
-		log("Msg> " + e.getMessage());
-	}
+//	public void onBattleMessage(BattleMessageEvent e) {
+//		log("Msg> " + e.getMessage());
+//	}
 
-	public void onBattleError(BattleErrorEvent e) {
-		log("Err> " + e.getError());
-	}
+//	public void onBattleError(BattleErrorEvent e) {
+//		log("Err> " + e.getError());
+//	}
 
-	public void log(String out) {
-		if (LOG_PARTIAL_RESULTS) {
-			System.out.println(out);
-		}
-	}
+//	public void log(String out) {
+//		if (LOG_PARTIAL_RESULTS) {
+//			System.out.println(out);
+//		}
+//	}
 
 }

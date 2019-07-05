@@ -10,25 +10,19 @@ import robocode.control.RobotSpecification;
 import javax.swing.*;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.time.LocalDateTime;
 
 /**
  * It will run several battles in Robocode and make use of Genetic Algorithm to train our robot.
  */
 public class GPAlgorithm extends FitnessFunction {
 
-	private static final int THREAD_SIZE = 4;
-	private ExecutorService workers = Executors.newFixedThreadPool(THREAD_SIZE);
-
 	private Configuration conf;
 
 	private SpinnerNumberModel model = new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1);
 
-	private static final int POPULATION_SIZE = 100;
-	private static final int MAX_GENERATIONS = 45;
+	private static final int POPULATION_SIZE = 25;
+	private static final int MAX_GENERATIONS = 15;
 	public static int robotScore, enemyScore;
 
 	public static void main(String[] args) throws Exception {
@@ -56,21 +50,13 @@ public class GPAlgorithm extends FitnessFunction {
 		conf.setPopulationSize(POPULATION_SIZE);
 
 		Genotype population = Genotype.randomInitialGenotype(conf);
-
-		List<Integer> hackLoop = new LinkedList<>();
 		for (int i = 1; i <= MAX_GENERATIONS; ++i) {
-			hackLoop.add(i);
-		}
-
-		hackLoop.forEach(index -> workers.execute(() -> {
 			population.evolve();
 			IChromosome bestFit = population.getFittestChromosome();
-			System.out.printf("--- Best solution after %d generation: %s  ---\n", index, bestFit);
-			saveInfoAboutBestFit(index, bestFit.getFitnessValue());
-			if (index == MAX_GENERATIONS) {
-				createRobot(bestFit);
-			}
-		}));
+			System.out.printf(currentTimestamp() + " Best solution of generation %d:\n\t\t%s\n\n", i, bestFit);
+			saveInfoAboutBestFit(i, bestFit.getFitnessValue());
+			RobotFactory.saveCodeFromBestSolutionOfGeneration(i, solveRobotConfig(bestFit));
+		}
 	}
 
 	private synchronized void saveInfoAboutBestFit(int i, double fitnessValue) {
@@ -94,8 +80,8 @@ public class GPAlgorithm extends FitnessFunction {
 	}
 
 	public Gene[] getGenes() throws InvalidConfigurationException {
-		Gene[] sample = new Gene[RobotFactory.MAX_ROBOT_ID];
-		for (int i = 0; i < RobotFactory.MAX_ROBOT_ID; i++) {
+		Gene[] sample = new Gene[RobotFactory.MAX_FEATURES];
+		for (int i = 0; i < RobotFactory.MAX_FEATURES; i++) {
 			sample[i] = new IntegerGene(conf, RobotFactory.MIN_ROBOT_ID, RobotFactory.MAX_ROBOT_ID);
 		}
 		return sample;
@@ -105,11 +91,7 @@ public class GPAlgorithm extends FitnessFunction {
 	 * Creates a robot from chromosome
 	 */
 	private void createRobot(IChromosome chromo) {
-		int[] robotConfig = new int[RobotFactory.MAX_ROBOT_ID];
-		Gene[] genes = chromo.getGenes();
-		for (int i = 0; i < RobotFactory.MAX_ROBOT_ID; i++) {
-			robotConfig[i] = (int) genes[i].getAllele();
-		}
+		int[] robotConfig = solveRobotConfig(chromo);
 		RobotFactory.create(robotConfig);
 	}
 
@@ -124,7 +106,7 @@ public class GPAlgorithm extends FitnessFunction {
 	@Override
 	protected double evaluate(IChromosome chromosome) {
 		int numberOfRounds = 2;
-		int fitness = 0;
+		double fitness = 0;
 
 		createRobot(chromosome);
 
@@ -136,18 +118,33 @@ public class GPAlgorithm extends FitnessFunction {
 		RobotSpecification[] selectedRobots = engine.getLocalRepository("sample.Crazy, " + RobotFactory.MODEL_NAME);
 		BattleSpecification battleSpec = new BattleSpecification(numberOfRounds, battlefield, selectedRobots);
 		engine.runBattle(battleSpec, true);
-		fitness += robotScore;
+		fitness += robotScore - enemyScore;
 
 		battlefield = new BattlefieldSpecification(800, 600);
 		selectedRobots = engine.getLocalRepository("sample.Walls, " + RobotFactory.MODEL_NAME);
 		battleSpec = new BattleSpecification(numberOfRounds, battlefield, selectedRobots);
 		engine.runBattle(battleSpec, true);
-
-		fitness += robotScore;
+		fitness += robotScore - enemyScore;
 
 		engine.close();
 
-		return fitness / 2;
+		fitness = fitness / 2.0;
+
+		return fitness > 0.0 ? fitness : 0.0;
+	}
+
+	private int[] solveRobotConfig(IChromosome chromo) {
+		int[] robotConfig = new int[RobotFactory.MAX_FEATURES];
+		Gene[] genes = chromo.getGenes();
+		for (int i = 0; i < RobotFactory.MAX_FEATURES; i++) {
+			robotConfig[i] = (int) genes[i].getAllele();
+		}
+		return robotConfig;
+	}
+
+	private static String currentTimestamp() {
+		LocalDateTime time = LocalDateTime.now();
+		return time.getYear() + "-" + time.getMonthValue() + "-" + time.getDayOfMonth() + " " + time.getHour() + ":" + time.getMinute();
 	}
 
 }
