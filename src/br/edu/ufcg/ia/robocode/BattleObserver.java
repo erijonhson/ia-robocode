@@ -1,18 +1,9 @@
-package robocodeIA;
+package br.edu.ufcg.ia.robocode;
 
 import robocode.control.events.BattleAdaptor;
 import robocode.control.events.BattleCompletedEvent;
 import robocode.control.events.BattleErrorEvent;
-import robocode.control.events.BattleFinishedEvent;
 import robocode.control.events.BattleMessageEvent;
-import robocode.control.events.BattlePausedEvent;
-import robocode.control.events.BattleResumedEvent;
-import robocode.control.events.BattleStartedEvent;
-import robocode.control.events.IBattleListener;
-import robocode.control.events.RoundEndedEvent;
-import robocode.control.events.RoundStartedEvent;
-import robocode.control.events.TurnEndedEvent;
-import robocode.control.events.TurnStartedEvent;
 
 public class BattleObserver extends BattleAdaptor {
 

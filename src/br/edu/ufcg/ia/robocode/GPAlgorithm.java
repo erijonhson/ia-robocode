@@ -1,4 +1,4 @@
-package robocodeIA;
+package br.edu.ufcg.ia.robocode;
 
 import java.io.FileWriter;
 import java.io.IOException;

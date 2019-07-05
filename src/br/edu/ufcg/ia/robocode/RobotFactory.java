@@ -1,4 +1,4 @@
-package robocodeIA;
+package br.edu.ufcg.ia.robocode;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
